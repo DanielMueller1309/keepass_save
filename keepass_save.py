@@ -201,12 +201,12 @@ def main():
                 result['new_password'] = entry_password
                 result['changed'] = True
 
-            if notes != db_entry_notes :
+            if notes != db_entry_notes and notes is not None:
                 set_notes(module, kp, title, notes)
                 result['new_notes'] = notes
                 result['changed'] = True
 
-            if url != db_entry_url:
+            if url != db_entry_url and url is not None:
                 set_url(module, kp, title, url)
                 result['new_url'] = url
                 result['changed'] = True
