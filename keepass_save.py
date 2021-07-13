@@ -23,7 +23,11 @@ short_description: This a module to interact with a keepass (kdbx) database.
 version_added: "1.0"
 
 description:
-    - "This a module to interact with a keepass (kdbx) database. To save informatin into a kdbx file (exept  and icon, comming soon)"
+    - This a module to interact with a keepass (kdbx) database. To save informatin into a kdbx file (exept  and icon, comming soon)
+    - If you remove parameter thats are specified in the kdbx file they will be unchanged and you get back a changed:"false", if
+      everything who has to change is the same like in your task.
+      So you can overwrite specific parameters in an entry without change the others.
+       
 
 requirements:
     - PyKeePass
@@ -34,46 +38,59 @@ options:
             - Path of the keepass database.
         required: true
         type: str
-
+        defaults: not set
+        
     keyfile:
         description:
             - Path of the keepass keyfile. Either this or 'password' (or both) are required.
-        required: false
+        required: false (if db_password is set)
         type: str
-
+        defaults: not set
+        
     title:
         description:
             - title, will be used for the title of the entry.
         required: true
         type: str
-
+        defaults: not set
+        
     username:
         description:
             - Username of the entry.
         required: true
         type: str
-
+        defaults: not set
+        
     db_password:
         description:
             - Path of the keepass keyfile. Either this or 'keyfile' (or both) are required.
-        required: false
+        required: false (if keyfile is set)
         type: str
+        defaults: not set
         
     notes:
         description:
             - this param is the most important one (sacasm) he gives us the the space for notes
+        required: false
+        type: str
         defaults:
             - 'This Entry is Ansible Managed'
-            
+        defaults: not set
     icon:
         description:
             - to specifi somethin for the eys to see with the default icon which entry is ansible manged
         defaults:
             - '47'
-            
+        required: false
+        type: str
+        defaults: not set
+        
     url: 
         description:
         - to fill the url field in kdbx file
+        required: false
+        type: str
+        defaults: not set
         
 author:
     - DanielMueller1309 https://github.com/DanielMueller1309
