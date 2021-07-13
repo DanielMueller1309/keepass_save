@@ -5,6 +5,7 @@
 
 # Make coding more python3-ish
 from __future__ import (absolute_import, division, print_function)
+
 __metaclass__ = type
 
 ANSIBLE_METADATA = {
@@ -157,8 +158,8 @@ def main():
 
     database        = module.params['database']
     keyfile         = module.params['keyfile']
-    db_password        = module.params['db_password']
-    title         = module.params['title']
+    db_password     = module.params['db_password']
+    title           = module.params['title']
     username        = module.params['username']
     entry_password  = module.params['entry_password']
     notes           = module.params['notes']
@@ -226,7 +227,6 @@ def main():
                 result['new_icon'] = str(icon)
                 result['changed'] = True
 
-
             module.exit_json(**result)
 
     # if there is no matching entry, create a new one
@@ -242,9 +242,9 @@ def main():
     result['add_username']          = username
     result['add_entry_password']    = entry_password
     result['add_notes']             = notes
-    result['add_icon'] = icon
-    result['add_url'] = url
-    result['changed']           = True
+    result['add_icon']              = icon
+    result['add_url']               = url
+    result['changed']               = True
 
     # in the event of a successful module execution, you will want to
     # simple AnsibleModule.exit_json(), passing the key/value results
@@ -253,6 +253,7 @@ def main():
 def create_entry(module, kp, username, title, password, notes, icon, url):
     kp.add_entry(kp.root_group, title, username, password, icon=str(icon), notes=notes, url=url)
     kp.save()
+
 #set specific stuff (here to change later is the group to a new module param)
 def set_username(module, kp, title, username):
     entry = kp.find_entries(title=title, first=True)
