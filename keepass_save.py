@@ -5,6 +5,7 @@
 
 # Make coding more python3-ish
 from __future__ import (absolute_import, division, print_function)
+
 __metaclass__ = type
 
 ANSIBLE_METADATA = {
@@ -22,7 +23,11 @@ short_description: This a module to interact with a keepass (kdbx) database.
 version_added: "1.0"
 
 description:
-    - "This a module to interact with a keepass (kdbx) database. To save informatin into a kdbx file (exept  and icon, comming soon)"
+    - This a module to interact with a keepass (kdbx) database. To save informatin into a kdbx file (exept  and icon, comming soon)
+    - If you remove parameter thats are specified in the kdbx file they will be unchanged and you get back a changed:"false", if
+      everything who has to change is the same like in your task.
+      So you can overwrite specific parameters in an entry without change the others.
+       
 
 requirements:
     - PyKeePass
@@ -33,46 +38,59 @@ options:
             - Path of the keepass database.
         required: true
         type: str
-
+        defaults: not set
+        
     keyfile:
         description:
             - Path of the keepass keyfile. Either this or 'password' (or both) are required.
-        required: false
+        required: false (if db_password is set)
         type: str
-
+        defaults: not set
+        
     title:
         description:
             - title, will be used for the title of the entry.
         required: true
         type: str
-
+        defaults: not set
+        
     username:
         description:
             - Username of the entry.
         required: true
         type: str
-
+        defaults: not set
+        
     db_password:
         description:
             - Path of the keepass keyfile. Either this or 'keyfile' (or both) are required.
-        required: false
+        required: false (if keyfile is set)
         type: str
+        defaults: not set
         
     notes:
         description:
             - this param is the most important one (sacasm) he gives us the the space for notes
+        required: false
+        type: str
         defaults:
             - 'This Entry is Ansible Managed'
-            
+        defaults: not set
     icon:
         description:
             - to specifi somethin for the eys to see with the default icon which entry is ansible manged
         defaults:
             - '47'
-            
+        required: false
+        type: str
+        defaults: not set
+        
     url: 
         description:
         - to fill the url field in kdbx file
+        required: false
+        type: str
+        defaults: not set
         
 author:
     - DanielMueller1309 https://github.com/DanielMueller1309
@@ -157,8 +175,8 @@ def main():
 
     database        = module.params['database']
     keyfile         = module.params['keyfile']
-    db_password        = module.params['db_password']
-    title         = module.params['title']
+    db_password     = module.params['db_password']
+    title           = module.params['title']
     username        = module.params['username']
     entry_password  = module.params['entry_password']
     notes           = module.params['notes']
@@ -201,12 +219,12 @@ def main():
                 result['new_password'] = entry_password
                 result['changed'] = True
 
-            if notes != db_entry_notes :
+            if notes != db_entry_notes and notes is not None:
                 set_notes(module, kp, title, notes)
                 result['new_notes'] = notes
                 result['changed'] = True
 
-            if url != db_entry_url:
+            if url != db_entry_url and url is not None:
                 set_url(module, kp, title, url)
                 result['new_url'] = url
                 result['changed'] = True
@@ -226,7 +244,6 @@ def main():
                 result['new_icon'] = str(icon)
                 result['changed'] = True
 
-
             module.exit_json(**result)
 
     # if there is no matching entry, create a new one
@@ -242,9 +259,9 @@ def main():
     result['add_username']          = username
     result['add_entry_password']    = entry_password
     result['add_notes']             = notes
-    result['add_icon'] = icon
-    result['add_url'] = url
-    result['changed']           = True
+    result['add_icon']              = icon
+    result['add_url']               = url
+    result['changed']               = True
 
     # in the event of a successful module execution, you will want to
     # simple AnsibleModule.exit_json(), passing the key/value results
@@ -253,6 +270,7 @@ def main():
 def create_entry(module, kp, username, title, password, notes, icon, url):
     kp.add_entry(kp.root_group, title, username, password, icon=str(icon), notes=notes, url=url)
     kp.save()
+
 #set specific stuff (here to change later is the group to a new module param)
 def set_username(module, kp, title, username):
     entry = kp.find_entries(title=title, first=True)
