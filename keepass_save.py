@@ -268,6 +268,14 @@ def main():
     module.exit_json(**result)
 
 def create_entry(module, kp, username, title, password, notes, icon, url):
+
+    if password is None:
+        password = ''
+    if notes is None:
+        notes = ''
+    if url is None:
+        url = ''
+
     kp.add_entry(kp.root_group, title, username, password, icon=str(icon), notes=notes, url=url)
     kp.save()
 
