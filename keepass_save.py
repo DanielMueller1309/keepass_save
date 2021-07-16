@@ -43,6 +43,7 @@ options:
     keyfile:
         description:
             - Path of the keepass keyfile. Either this or 'password' (or both) are required.
+            - don´t can be used if state is 'create'
         required: false (if db_password is set)
         type: str
         defaults: not set
@@ -50,32 +51,40 @@ options:
     title:
         description:
             - title, will be used for the title of the entry.
-        required: true
+        required: false (but if not set no entry will be add or modify)
         type: str
         defaults: not set
         
     username:
         description:
             - Username of the entry.
-        required: true
+        required: false
+        type: str
+        defaults: not set
+        
+    entry_password:
+        description:
+            - password of the entry.
+        required: false
         type: str
         defaults: not set
         
     db_password:
         description:
-            - Path of the keepass keyfile. Either this or 'keyfile' (or both) are required.
+            - database password. Either this or 'keyfile' (or both) are required.
         required: false (if keyfile is set)
         type: str
         defaults: not set
         
     notes:
         description:
-            - this param is the most important one (sacasm) he gives us the the space for notes
+            - this param is the most important one (sacasm) it gives us the the space for notes
         required: false
         type: str
         defaults:
             - 'This Entry is Ansible Managed'
         defaults: not set
+        
     icon:
         description:
             - to specifi somethin for the eys to see with the default icon which entry is ansible manged
@@ -134,7 +143,6 @@ EXAMPLES = '''
     url: 'https://pornhub.com'
     state: create
 '''
-
 RETURN = '''
 new_username:
     description: the new username who is set by an existing entry
