@@ -43,8 +43,7 @@ options:
     keyfile:
         description:
             - Path of the keepass keyfile. Either this or 'password' (or both) are required.
-            - don´t can be used if state is 'create'
-        required: false (if db_password is set)
+        required: false
         type: str
         defaults: not set
         
@@ -72,7 +71,7 @@ options:
     db_password:
         description:
             - database password. Either this or 'keyfile' (or both) are required.
-        required: false (if keyfile is set)
+        required: false
         type: str
         defaults: not set
         
@@ -87,7 +86,7 @@ options:
         
     icon:
         description:
-            - to specifi somethin for the eys to see with the default icon which entry is ansible manged
+            - to specifi something for the eys to see with the default icon which entry is ansible manged
         defaults:
             - '47'
         required: false
@@ -104,7 +103,6 @@ options:
     state:
         description:
         - used to specify if a database have to 'create' or 'modify'
-        - don´t work with 'keyfile'
         required: true
         type: str
         default: not set 
@@ -114,10 +112,10 @@ author:
 '''
 
 EXAMPLES = '''
-- name: Add entry or change existung one in the database
+- name: Add entry or change existing one in the database
   keepass:
-    database: /tmp/vault.kdbx
-    keyfile: /tmp/vault.key
+    database: /home/user/vault.kdbx
+    keyfile: /home/user/vault.key
     title: storage_admin
     username: admin-user
     entry_password: hallowelt
@@ -126,15 +124,21 @@ EXAMPLES = '''
     url: 'https://pornhub.com'
     state: modify
 
-- name: create new database (don´t work with keyfile if state is create)
+- name: create new database with keyfile and db_password
   keepass:
-    database: /tmp/vault.kdbx
+    database: /home/user/vault.kdbx
     db_password: 'hallowelt'
+    keyfile : /home/user/vault.key
+    state: create
+
+- name: create new database without any keyfile and db_password
+  keepass:
+    database: /home/user/vault.kdbx
     state: create
     
-- name: create new database with his first entry(don´t work with keyfile if state is create)
+- name: create new database with his first entry
   keepass:
-    database: /tmp/vault.kdbx
+    database: /home/user/vault.kdbx
     db_password: 'hallowelt'
     username: admin-user
     entry_password: hallowelt
@@ -151,7 +155,7 @@ add_username:
     description: the added username who is set by a new entry
     type: str
 
-P.S: this return statements are also available by every entry parameter who is changed or created
+P.S: this return statements are also available by every entry parameter who is changed or created except 'new_database'
 '''
 import traceback
 
@@ -170,6 +174,9 @@ else:
 
 import subprocess
 import argparse
+
+import string
+import random
 
 def main():
     # define available arguments/parameters a user can pass to the module
@@ -230,7 +237,7 @@ def main():
 
     if not db_password and not keyfile:
         KEEPASS_OPEN_ERR = traceback.format_exc()
-        module.fail_json(msg="Either 'password' or 'keyfile' (or both) are required.")
+        module.fail_json(msg="Either 'password' or 'keyfile' (or both) are required. (its for safety)")
 
     if state == 'create':
         if keyfile is not None:
@@ -321,7 +328,7 @@ def main():
             except:
                 KEEPASS_SAVE_ERR = traceback.format_exc()
                 module.fail_json(msg='Could not add the entry or save the database.', exception=KEEPASS_SAVE_ERR)
-
+            result['add_database']          = database
             result['add_title']             = title
             result['add_username']          = username
             result['add_entry_password']    = entry_password
