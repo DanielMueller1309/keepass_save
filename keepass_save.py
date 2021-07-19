@@ -233,12 +233,20 @@ def main():
         module.fail_json(msg="Either 'password' or 'keyfile' (or both) are required.")
 
     if state == 'create':
+        if keyfile is not None:
+            try:
+                create_keyfile(keyfile)
+            except:
+                KEEPASS_OPEN_ERR = traceback.format_exc()
+                module.fail_json(
+                    msg="Could not create Key File. Please verify that the path is set correct (do not use /tmp path).")
         try:
-            kp = pykeepass.create_database(database, password=db_password) #, keyfile=keyfile)
+            kp = pykeepass.create_database(database, password=db_password, keyfile=keyfile)
             result['changed'] = True
             result['new_database'] = database
             result['new_db_password'] = db_password
-            #result['new_keyfile'] = keyfile
+            result['keyfile'] = keyfile
+
         except:
             KEEPASS_OPEN_ERR = traceback.format_exc()
             module.fail_json(msg="Could not create Database File. Please verify that the path is set correctly and set 'db_password'")
@@ -322,6 +330,28 @@ def main():
             result['add_url']               = url
             result['changed']               = True
     module.exit_json(**result)
+
+def create_keyfile(keyfile):
+    file = open(keyfile, 'w')
+    keyfile_text = r'''<?xml version="1.0" encoding="utf-8"?>
+<KeyFile>
+    <Meta>
+        <Version>1.00</Version>
+    </Meta>
+    <Key>
+        <Data>key_string</Data>
+    </Key>
+</KeyFile>
+    '''
+
+    keyfile_text = keyfile_text.replace("key_string", random_string(64))
+    file.write(keyfile_text)
+    file.close()
+
+
+def random_string(length):
+    pool = string.ascii_letters + string.digits
+    return ''.join(random.choice(pool) for i in range(length))
 
 def create_entry(module, kp, username, title, password, notes, icon, url):
 
