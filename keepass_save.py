@@ -50,7 +50,8 @@ options:
     title:
         description:
             - title, will be used for the title of the entry.
-        required: false (but if not set no entry will be add or modify)
+            - if not set no entry will be add or modify
+        required: false
         type: str
         defaults: not set
         
