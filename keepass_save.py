@@ -83,7 +83,6 @@ options:
         type: str
         defaults:
             - 'This Entry is Ansible Managed'
-        defaults: not set
         
     icon:
         description:
