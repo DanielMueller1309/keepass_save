@@ -14,7 +14,7 @@ ANSIBLE_METADATA = {
     'supported_by': 'community'
 }
 
-DOCUMENTATION = '''
+DOCUMENTATION = r'''
 ---
 module: keepass
 
@@ -27,7 +27,7 @@ description:
     - If you remove parameter thats are specified in the kdbx file they will be unchanged and you get back a changed:"false", if
       everything who has to change is the same like in your task.
       So you can overwrite specific parameters in an entry without change the others.
-       
+
 
 requirements:
     - PyKeePass
@@ -39,14 +39,14 @@ options:
         required: true
         type: str
         defaults: not set
-        
+
     keyfile:
         description:
             - Path of the keepass keyfile. Either this or 'password' (or both) are required.
         required: false
         type: str
         defaults: not set
-        
+
     title:
         description:
             - title, will be used for the title of the entry.
@@ -54,28 +54,28 @@ options:
         required: false
         type: str
         defaults: not set
-        
+
     username:
         description:
             - Username of the entry.
         required: false
         type: str
         defaults: not set
-        
+
     entry_password:
         description:
             - password of the entry.
         required: false
         type: str
         defaults: not set
-        
+
     db_password:
         description:
             - database password. Either this or 'keyfile' (or both) are required.
         required: false
         type: str
         defaults: not set
-        
+
     notes:
         description:
             - this param is the most important one (sacasm) it gives us the the space for notes
@@ -83,7 +83,7 @@ options:
         type: str
         defaults:
             - 'This Entry is Ansible Managed'
-        
+
     icon:
         description:
             - to specifi something for the eys to see with the default icon which entry is ansible manged
@@ -91,27 +91,26 @@ options:
             - '47'
         required: false
         type: str
-        defaults: not set
-        
-    url: 
+
+    url:
         description:
         - to fill the url field in kdbx file
         required: false
         type: str
         defaults: not set
-        
+
     state:
         description:
         - used to specify if a database have to 'create' or 'modify'
         required: true
         type: str
-        default: not set 
-        
+        default: not set
+
 author:
     - DanielMueller1309 https://github.com/DanielMueller1309
 '''
 
-EXAMPLES = '''
+EXAMPLES = r'''
 - name: Add entry or change existing one in the database
   keepass:
     database: /home/user/vault.kdbx
@@ -135,7 +134,7 @@ EXAMPLES = '''
   keepass:
     database: /home/user/vault.kdbx
     state: create
-    
+
 - name: create new database with his first entry
   keepass:
     database: /home/user/vault.kdbx
@@ -147,7 +146,7 @@ EXAMPLES = '''
     url: 'https://pornhub.com'
     state: create
 '''
-RETURN = '''
+RETURN = r'''
 new_username:
     description: the new username who is set by an existing entry
     type: str
