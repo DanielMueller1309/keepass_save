@@ -177,7 +177,7 @@ import argparse
 import string
 import random
 
-def main():
+def run_module():
     # define available arguments/parameters a user can pass to the module
     module_args = dict(
         database=dict(type='str', required=True),
@@ -337,6 +337,8 @@ def main():
             result['changed']               = True
     module.exit_json(**result)
 
+def main():
+    run_module()
 def create_keyfile(keyfile):
     file = open(keyfile, 'w')
     keyfile_text = r'''<?xml version="1.0" encoding="utf-8"?>
