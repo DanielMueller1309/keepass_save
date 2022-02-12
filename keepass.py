@@ -249,15 +249,23 @@ def run_module():
                 module.fail_json(
                     msg="Could not create Key File. Please verify that the path is set correct (do not use /tmp path).")
         try:
-            kp = pykeepass.create_database(database, password=db_password, keyfile=keyfile)
-            result['changed'] = True
-            result['new_database'] = database
-            result['new_db_password'] = db_password
+            kp = PyKeePass(database, password=db_password, keyfile=keyfile)
+            result['changed'] = False
+            result['database'] = database
+            result['password'] = db_password
             result['keyfile'] = keyfile
-
         except:
-            KEEPASS_OPEN_ERR = traceback.format_exc()
-            module.fail_json(msg="Could not create Database File. Please verify that the path is set correctly and set 'db_password'")
+            try:
+
+                kp = pykeepass.create_database(database, password=db_password, keyfile=keyfile)
+                result['changed'] = True
+                result['new_database'] = database
+                result['new_db_password'] = db_password
+                result['keyfile'] = keyfile
+
+            except:
+                KEEPASS_OPEN_ERR = traceback.format_exc()
+                module.fail_json(msg="Could not create Database File. Please verify that the path is set correctly and set 'db_password'")
 
     if state == 'modify':
         try:
