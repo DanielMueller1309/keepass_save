@@ -294,22 +294,22 @@ def run_module():
                 #result['changed'] = False
                 if username != db_entry_username and username is not None:
                     set_username(module, kp, title, username)
-                    result['new_username'] = username
+                    result['new_username'] = get_username(module, kp, title)
                     result['changed'] = True
 
-                if entry_password != db_entry_password:
+                if entry_password != db_entry_password and entry_password is not None:
                     set_entry_password(module, kp, title, entry_password)
-                    result['new_password'] = entry_password
+                    result['entry_password'] = get_password(module, kp, title)
                     result['changed'] = True
 
                 if notes != db_entry_notes and notes is not None:
                     set_notes(module, kp, title, notes)
-                    result['new_notes'] = notes
+                    result['new_notes'] = get_notes(module, kp, title)
                     result['changed'] = True
 
                 if url != db_entry_url and url is not None:
                     set_url(module, kp, title, url)
-                    result['new_url'] = url
+                    result['new_url'] = get_url(module, kp, title)
                     result['changed'] = True
 
                 #if expiry_time is not db_entry_expiry_time and str(module_args['icon'].get('default')):
@@ -324,9 +324,21 @@ def run_module():
 
                 if str(icon) != str(db_entry_icon):
                     set_icon(module, kp, title, icon)
-                    result['new_icon'] = str(icon)
+                    result['new_icon'] = str(get_icon(module, kp, title))
                     result['changed'] = True
 
+                database        = module.params['database']
+                keyfile         = module.params['keyfile']
+                db_password     = module.params['db_password']
+                title           = module.params['title']
+                username        = module.params['username']
+                entry_password  = module.params['entry_password']
+                notes           = module.params['notes']
+                #expiry_time     = module.params['expiry_time']
+                #tags            = module.params['tags']
+                icon            = module.params['icon']
+                url             = module.params['url']
+                state           = module.params['state']
                 module.exit_json(**result)
 
         # if there is no matching entry, create a new one
