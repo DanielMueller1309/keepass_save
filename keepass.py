@@ -14,7 +14,7 @@ ANSIBLE_METADATA = {
     'supported_by': 'community'
 }
 
-DOCUMENTATION = '''
+DOCUMENTATION = r'''
 ---
 module: keepass
 
@@ -27,7 +27,7 @@ description:
     - If you remove parameter thats are specified in the kdbx file they will be unchanged and you get back a changed:"false", if
       everything who has to change is the same like in your task.
       So you can overwrite specific parameters in an entry without change the others.
-       
+
 
 requirements:
     - PyKeePass
@@ -39,14 +39,14 @@ options:
         required: true
         type: str
         defaults: not set
-        
+
     keyfile:
         description:
             - Path of the keepass keyfile. Either this or 'password' (or both) are required.
         required: false
         type: str
         defaults: not set
-        
+
     title:
         description:
             - title, will be used for the title of the entry.
@@ -54,28 +54,28 @@ options:
         required: false
         type: str
         defaults: not set
-        
+
     username:
         description:
             - Username of the entry.
         required: false
         type: str
         defaults: not set
-        
+
     entry_password:
         description:
             - password of the entry.
         required: false
         type: str
         defaults: not set
-        
+
     db_password:
         description:
             - database password. Either this or 'keyfile' (or both) are required.
         required: false
         type: str
         defaults: not set
-        
+
     notes:
         description:
             - this param is the most important one (sacasm) it gives us the the space for notes
@@ -83,7 +83,7 @@ options:
         type: str
         defaults:
             - 'This Entry is Ansible Managed'
-        
+
     icon:
         description:
             - to specifi something for the eys to see with the default icon which entry is ansible manged
@@ -91,27 +91,26 @@ options:
             - '47'
         required: false
         type: str
-        defaults: not set
-        
-    url: 
+
+    url:
         description:
         - to fill the url field in kdbx file
         required: false
         type: str
         defaults: not set
-        
+
     state:
         description:
         - used to specify if a database have to 'create' or 'modify'
         required: true
         type: str
-        default: not set 
-        
+        default: not set
+
 author:
     - DanielMueller1309 https://github.com/DanielMueller1309
 '''
 
-EXAMPLES = '''
+EXAMPLES = r'''
 - name: Add entry or change existing one in the database
   keepass:
     database: /home/user/vault.kdbx
@@ -135,7 +134,7 @@ EXAMPLES = '''
   keepass:
     database: /home/user/vault.kdbx
     state: create
-    
+
 - name: create new database with his first entry
   keepass:
     database: /home/user/vault.kdbx
@@ -147,7 +146,7 @@ EXAMPLES = '''
     url: 'https://pornhub.com'
     state: create
 '''
-RETURN = '''
+RETURN = r'''
 new_username:
     description: the new username who is set by an existing entry
     type: str
@@ -178,7 +177,7 @@ import argparse
 import string
 import random
 
-def main():
+def run_module():
     # define available arguments/parameters a user can pass to the module
     module_args = dict(
         database=dict(type='str', required=True),
@@ -203,6 +202,8 @@ def main():
     # for consumption, for example, in a subsequent task
     result = dict(
         changed=False,
+        original_message='',
+        message=''
     )
 
     # the AnsibleModule object will be our abstraction working with Ansible
@@ -248,15 +249,23 @@ def main():
                 module.fail_json(
                     msg="Could not create Key File. Please verify that the path is set correct (do not use /tmp path).")
         try:
-            kp = pykeepass.create_database(database, password=db_password, keyfile=keyfile)
-            result['changed'] = True
-            result['new_database'] = database
-            result['new_db_password'] = db_password
+            kp = PyKeePass(database, password=db_password, keyfile=keyfile)
+            result['changed'] = False
+            result['database'] = database
+            result['password'] = db_password
             result['keyfile'] = keyfile
-
         except:
-            KEEPASS_OPEN_ERR = traceback.format_exc()
-            module.fail_json(msg="Could not create Database File. Please verify that the path is set correctly and set 'db_password'")
+            try:
+
+                kp = pykeepass.create_database(database, password=db_password, keyfile=keyfile)
+                result['changed'] = True
+                result['new_database'] = database
+                result['new_db_password'] = db_password
+                result['keyfile'] = keyfile
+
+            except:
+                KEEPASS_OPEN_ERR = traceback.format_exc()
+                module.fail_json(msg="Could not create Database File. Please verify that the path is set correctly and set 'db_password'")
 
     if state == 'modify':
         try:
@@ -285,22 +294,22 @@ def main():
                 #result['changed'] = False
                 if username != db_entry_username and username is not None:
                     set_username(module, kp, title, username)
-                    result['new_username'] = username
+                    result['new_username'] = get_username(module, kp, title)
                     result['changed'] = True
 
-                if entry_password != db_entry_password:
+                if entry_password != db_entry_password and entry_password is not None:
                     set_entry_password(module, kp, title, entry_password)
-                    result['new_password'] = entry_password
+                    result['entry_password'] = get_password(module, kp, title)
                     result['changed'] = True
 
                 if notes != db_entry_notes and notes is not None:
                     set_notes(module, kp, title, notes)
-                    result['new_notes'] = notes
+                    result['new_notes'] = get_notes(module, kp, title)
                     result['changed'] = True
 
                 if url != db_entry_url and url is not None:
                     set_url(module, kp, title, url)
-                    result['new_url'] = url
+                    result['new_url'] = get_url(module, kp, title)
                     result['changed'] = True
 
                 #if expiry_time is not db_entry_expiry_time and str(module_args['icon'].get('default')):
@@ -315,9 +324,21 @@ def main():
 
                 if str(icon) != str(db_entry_icon):
                     set_icon(module, kp, title, icon)
-                    result['new_icon'] = str(icon)
+                    result['new_icon'] = str(get_icon(module, kp, title))
                     result['changed'] = True
 
+                database        = module.params['database']
+                keyfile         = module.params['keyfile']
+                db_password     = module.params['db_password']
+                title           = module.params['title']
+                username        = module.params['username']
+                entry_password  = module.params['entry_password']
+                notes           = module.params['notes']
+                #expiry_time     = module.params['expiry_time']
+                #tags            = module.params['tags']
+                icon            = module.params['icon']
+                url             = module.params['url']
+                state           = module.params['state']
                 module.exit_json(**result)
 
         # if there is no matching entry, create a new one
@@ -338,6 +359,8 @@ def main():
             result['changed']               = True
     module.exit_json(**result)
 
+def main():
+    run_module()
 def create_keyfile(keyfile):
     file = open(keyfile, 'w')
     keyfile_text = r'''<?xml version="1.0" encoding="utf-8"?>
@@ -360,18 +383,18 @@ def random_string(length):
     pool = string.ascii_letters + string.digits
     return ''.join(random.choice(pool) for i in range(length))
 
-def create_entry(module, kp, username, title, password, notes, icon, url):
+def create_entry(module, kp, username, title, entry_password, notes, icon, url):
 
     if username is None:
         username = ''
-    if password is None:
-        password = ''
+    if entry_password is None:
+        entry_password = ''
     if notes is None:
         notes = ''
     if url is None:
         url = ''
 
-    kp.add_entry(kp.root_group, title, username, password, icon=str(icon), notes=notes, url=url)
+    kp.add_entry(kp.root_group, title, username, entry_password, icon=str(icon), notes=notes, url=url)
     kp.save()
 
 #set specific stuff (here to change later is the group to a new module param)
@@ -427,42 +450,42 @@ def get_entry(module, kp, title):
 
 # give back specific stuff in list:  (entry.title, entry.parameter)
 
-def get_username(module, kp, title, username):
+def get_username(module, kp, title):
     entry = kp.find_entries(title=title, first=True)
     if (entry):
         return (entry.username)
 
-def get_password(module, kp, title, password):
+def get_password(module, kp, title):
     entry = kp.find_entries(title=title, first=True)
     if (entry):
         return (entry.password)
 
-def get_url(module, kp, title, url):
+def get_url(module, kp, title):
     entry = kp.find_entries(title=title, first=True)
     if (entry):
         return (entry.url)
 
-def get_notes(module, kp, title, notes):
+def get_notes(module, kp, title):
     entry = kp.find_entries(title=title, first=True)
     if (entry):
         return (entry.notes)
 
-def get_expiry_time(module, kp, title, expiry_time):
+def get_expiry_time(module, kp, title):
     entry = kp.find_entries(title=title, first=True)
     if (entry):
         return (entry.expiry_time)
 
-def get_tags(module, kp, title, tags):
+def get_tags(module, kp, title):
     entry = kp.find_entries(title=title, first=True)
     if (entry):
         return (entry.tags)
 
-def get_icon(module, kp, title, icon):
+def get_icon(module, kp, title):
     entry = kp.find_entries(title=title, first=True)
     if (entry):
         return (entry.icon)
 
-def get_param(param, module, kp, title):
+def get_param(module, kp, title):
     entry = kp.find_entries(title=title, first=True)
     if (entry):
         return (param)
