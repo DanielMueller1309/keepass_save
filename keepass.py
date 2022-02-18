@@ -438,42 +438,42 @@ def get_entry(module, kp, title):
 
 # give back specific stuff in list:  (entry.title, entry.parameter)
 
-def get_username(module, kp, title, username):
+def get_username(module, kp, title):
     entry = kp.find_entries(title=title, first=True)
     if (entry):
         return (entry.username)
 
-def get_password(module, kp, title, password):
+def get_password(module, kp, title):
     entry = kp.find_entries(title=title, first=True)
     if (entry):
         return (entry.password)
 
-def get_url(module, kp, title, url):
+def get_url(module, kp, title):
     entry = kp.find_entries(title=title, first=True)
     if (entry):
         return (entry.url)
 
-def get_notes(module, kp, title, notes):
+def get_notes(module, kp, title):
     entry = kp.find_entries(title=title, first=True)
     if (entry):
         return (entry.notes)
 
-def get_expiry_time(module, kp, title, expiry_time):
+def get_expiry_time(module, kp, title):
     entry = kp.find_entries(title=title, first=True)
     if (entry):
         return (entry.expiry_time)
 
-def get_tags(module, kp, title, tags):
+def get_tags(module, kp, title):
     entry = kp.find_entries(title=title, first=True)
     if (entry):
         return (entry.tags)
 
-def get_icon(module, kp, title, icon):
+def get_icon(module, kp, title):
     entry = kp.find_entries(title=title, first=True)
     if (entry):
         return (entry.icon)
 
-def get_param(param, module, kp, title):
+def get_param(module, kp, title):
     entry = kp.find_entries(title=title, first=True)
     if (entry):
         return (param)
