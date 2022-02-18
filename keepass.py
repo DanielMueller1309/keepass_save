@@ -383,18 +383,18 @@ def random_string(length):
     pool = string.ascii_letters + string.digits
     return ''.join(random.choice(pool) for i in range(length))
 
-def create_entry(module, kp, username, title, password, notes, icon, url):
+def create_entry(module, kp, username, title, entry_password, notes, icon, url):
 
     if username is None:
         username = ''
-    if password is None:
-        password = ''
+    if entry_password is None:
+        entry_password = ''
     if notes is None:
         notes = ''
     if url is None:
         url = ''
 
-    kp.add_entry(kp.root_group, title, username, password, icon=str(icon), notes=notes, url=url)
+    kp.add_entry(kp.root_group, title, username, entry_password, icon=str(icon), notes=notes, url=url)
     kp.save()
 
 #set specific stuff (here to change later is the group to a new module param)
