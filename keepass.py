@@ -184,6 +184,7 @@ def run_module():
         keyfile=dict(type='str', required=False, default=None),
         db_password=dict(type='str', required=False, default=None, no_log=True),
         title=dict(type='str', required=False),
+        group=dict(type='str', required=False, default=None),
         username=dict(type='str', required=False),
         entry_password=dict(type='str', required=False, default=None, no_log=True),
         notes=dict(type='str', required=False, default='This Entry is Ansible Managed'),
@@ -222,6 +223,7 @@ def run_module():
     keyfile         = module.params['keyfile']
     db_password     = module.params['db_password']
     title           = module.params['title']
+    group           = module.params['group']
     username        = module.params['username']
     entry_password  = module.params['entry_password']
     notes           = module.params['notes']
@@ -331,6 +333,7 @@ def run_module():
                 keyfile         = module.params['keyfile']
                 db_password     = module.params['db_password']
                 title           = module.params['title']
+                group           = module.params['group']
                 username        = module.params['username']
                 entry_password  = module.params['entry_password']
                 notes           = module.params['notes']
