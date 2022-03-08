@@ -400,6 +400,9 @@ def create_entry(module, kp, username, title, entry_password, notes, icon, url):
     kp.add_entry(kp.root_group, title, username, entry_password, icon=str(icon), notes=notes, url=url)
     kp.save()
 
+def create_group(module, kp, group)
+    kp.add_group(kp.root_group, group=group)
+    kp.save()
 #set specific stuff (here to change later is the group to a new module param)
 def set_username(module, kp, title, username):
     entry = kp.find_entries(title=title, first=True)
