@@ -282,7 +282,9 @@ def run_module():
 
     # try to get the entry from the database
     if title is not None:
-        db_entry = get_entry(module, kp, title)
+        if group is not None:
+            create_group(module, kp, group)
+        db_entry = get_entry(module, kp, title, group)
         #user_entry = (title, username, entry_password, url, notes, expiry_time, tags, icon)
         #parameter = ('entry.title', 'entry.username','entry.password', 'entry.url', 'entry.notes', 'entry.expiry_time', 'entry.tags', 'entry.icon')
         #parameter_name = ('title', 'username', 'password', 'url', 'notes', 'expiry_time', 'tags', 'icon')
@@ -348,6 +350,7 @@ def run_module():
         #password = entry_password
         if not module.check_mode:
             try:
+                create_group(module, kp, group)
                 create_entry(module, kp, username, title, entry_password, notes, icon, url)
             except:
                 KEEPASS_SAVE_ERR = traceback.format_exc()
@@ -386,7 +389,7 @@ def random_string(length):
     pool = string.ascii_letters + string.digits
     return ''.join(random.choice(pool) for i in range(length))
 
-def create_entry(module, kp, username, title, entry_password, notes, icon, url):
+def create_entry(module, kp, username, title, entry_password, notes, icon, url, group):
 
     if username is None:
         username = ''
@@ -397,7 +400,10 @@ def create_entry(module, kp, username, title, entry_password, notes, icon, url):
     if url is None:
         url = ''
 
-    kp.add_entry(kp.root_group, title, username, entry_password, icon=str(icon), notes=notes, url=url)
+    if group is not None:
+        kp.add_entry(kp.root_group, title, username, entry_password, icon=str(icon), notes=notes, url=url, group=group)
+    else:
+        kp.add_entry(kp.root_group, title, username, entry_password, icon=str(icon), notes=notes, url=url)
     kp.save()
 
 def create_group(module, kp, group)
@@ -445,12 +451,13 @@ def set_param(param, parameter_name, module, kp, title, username,entry_password,
     kp.save()
 
 #giveback all entry infos
-def get_entry(module, kp, title):
-
-    entry = kp.find_entries(title=title, first=True)
-
+def get_entry(module, kp, title, group):
+    if group is not None:
+        entry = kp.find_entries(title=title, first=True, group=group)
+    else:
+        entry = kp.find_entries(title=title, first=True)
     if (entry):
-        return (entry.title, entry.username, entry.password, entry.url, entry.notes, entry.expiry_time, entry.tags,  entry.icon) #
+        return (entry.title, entry.username, entry.password, entry.url, entry.notes, entry.expiry_time, entry.tags,  entry.icon)
     else:
         return None
 
