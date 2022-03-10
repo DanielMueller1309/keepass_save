@@ -184,7 +184,7 @@ def run_module():
         keyfile=dict(type='str', required=False, default=None),
         db_password=dict(type='str', required=False, default=None, no_log=True),
         title=dict(type='str', required=False),
-        group=dict(type='str', required=False, default=None),
+        groupname=dict(type='str', required=False, default=None),
         username=dict(type='str', required=False),
         entry_password=dict(type='str', required=False, default=None, no_log=True),
         notes=dict(type='str', required=False, default='This Entry is Ansible Managed'),
@@ -223,7 +223,7 @@ def run_module():
     keyfile         = module.params['keyfile']
     db_password     = module.params['db_password']
     title           = module.params['title']
-    group           = module.params['group']
+    groupname       = module.params['groupname']
     username        = module.params['username']
     entry_password  = module.params['entry_password']
     notes           = module.params['notes']
@@ -282,9 +282,9 @@ def run_module():
 
     # try to get the entry from the database
     if title is not None:
-        if group is not None:
-            create_group(module, kp, group)
-        db_entry = get_entry(module, kp, title, group)
+        if groupname is not None:
+            create_group(module, kp, groupname)
+        db_entry = get_entry(module, kp, title, groupname)
         #user_entry = (title, username, entry_password, url, notes, expiry_time, tags, icon)
         #parameter = ('entry.title', 'entry.username','entry.password', 'entry.url', 'entry.notes', 'entry.expiry_time', 'entry.tags', 'entry.icon')
         #parameter_name = ('title', 'username', 'password', 'url', 'notes', 'expiry_time', 'tags', 'icon')
@@ -335,7 +335,7 @@ def run_module():
                 keyfile         = module.params['keyfile']
                 db_password     = module.params['db_password']
                 title           = module.params['title']
-                group           = module.params['group']
+                groupname       = module.params['groupname']
                 username        = module.params['username']
                 entry_password  = module.params['entry_password']
                 notes           = module.params['notes']
@@ -350,8 +350,9 @@ def run_module():
         #password = entry_password
         if not module.check_mode:
             try:
-                create_group(module, kp, group)
-                create_entry(module, kp, username, title, entry_password, notes, icon, url)
+                create_group(module, kp, groupname)
+                groupname = kp.find_groups(name=groupname, first=True)
+                create_entry(module, kp, username, title, entry_password, notes, icon, url, groupname)
             except:
                 KEEPASS_SAVE_ERR = traceback.format_exc()
                 module.fail_json(msg='Could not add the entry or save the database.', exception=KEEPASS_SAVE_ERR)
@@ -389,7 +390,7 @@ def random_string(length):
     pool = string.ascii_letters + string.digits
     return ''.join(random.choice(pool) for i in range(length))
 
-def create_entry(module, kp, username, title, entry_password, notes, icon, url, group):
+def create_entry(module, kp, username, title, entry_password, notes, icon, url, groupname):
 
     if username is None:
         username = ''
@@ -400,16 +401,18 @@ def create_entry(module, kp, username, title, entry_password, notes, icon, url, 
     if url is None:
         url = ''
 
-    if group is not None:
-        kp.add_entry(kp.root_group, title, username, entry_password, icon=str(icon), notes=notes, url=url, group=group)
+    if groupname is not None:
+
+        kp.add_entry(groupname, title, username, entry_password, icon=str(icon), notes=notes, url=url)
     else:
         kp.add_entry(kp.root_group, title, username, entry_password, icon=str(icon), notes=notes, url=url)
     kp.save()
 
-def create_group(module, kp, group):
-    kp.add_group(kp.root_group, group=group)
-    kp.save()
-#set specific stuff (here to change later is the group to a new module param)
+def create_group(module, kp, groupname):
+    if not kp.find_groups(name=groupname, first=True):
+        kp.add_group(kp.root_group, groupname)
+        kp.save()
+#set specific stuff (here to change later is the groupname to a new module param)
 def set_username(module, kp, title, username):
     entry = kp.find_entries(title=title, first=True)
     entry.username = username
@@ -451,9 +454,9 @@ def set_param(param, parameter_name, module, kp, title, username,entry_password,
     kp.save()
 
 #giveback all entry infos
-def get_entry(module, kp, title, group):
-    if group is not None:
-        entry = kp.find_entries(title=title, first=True, group=group)
+def get_entry(module, kp, title, groupname):
+    if groupname is not None:
+        entry = kp.find_entries(groupname, title=title, first=True)
     else:
         entry = kp.find_entries(title=title, first=True)
     if (entry):
