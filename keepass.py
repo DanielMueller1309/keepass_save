@@ -393,10 +393,10 @@ def main():
     run_module()
 def create_keyfile(keyfile):
     file = open(keyfile, 'w')
-    keyfile_text = r'''<?xml version="1.0" encoding="utf-8"?>
+    keyfile_text = r'''<?xml version="2.0" encoding="utf-8"?>
 <KeyFile>
     <Meta>
-        <Version>1.00</Version>
+        <Version>2.00</Version>
     </Meta>
     <Key>
         <Data>key_string</Data>
