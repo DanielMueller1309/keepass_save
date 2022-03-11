@@ -254,6 +254,10 @@ def run_module():
                     KEEPASS_OPEN_ERR = traceback.format_exc()
                     module.fail_json(msg="Could not create Key File. Please verify that the path is set correct (do not use /tmp path).")
         try:
+            f = open(database)
+            f.close()
+
+           #kp = PyKeePass(database, password=db_password, keyfile=keyfile)
             if db_password and keyfile is not None:
                 try:
                     kp = PyKeePass(database, password=db_password, keyfile=keyfile)
