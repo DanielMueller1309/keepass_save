@@ -245,13 +245,36 @@ def run_module():
     if state == 'create':
         if keyfile is not None:
             try:
-                create_keyfile(keyfile)
+                f = open(keyfile)
+                f.close()
             except:
-                KEEPASS_OPEN_ERR = traceback.format_exc()
-                module.fail_json(
-                    msg="Could not create Key File. Please verify that the path is set correct (do not use /tmp path).")
+                try:
+                    create_keyfile(keyfile)
+                except:
+                    KEEPASS_OPEN_ERR = traceback.format_exc()
+                    module.fail_json(msg="Could not create Key File. Please verify that the path is set correct (do not use /tmp path).")
         try:
-            kp = PyKeePass(database, password=db_password, keyfile=keyfile)
+            if db_password and keyfile is not None:
+                try:
+                    kp = PyKeePass(database, password=db_password, keyfile=keyfile)
+                except:
+                    KEEPASS_OPEN_ERR = traceback.format_exc()
+                    module.fail_json(
+                        msg="cant find keyfile or password")
+            if db_password is not None and keyfile is None:
+                try:
+                    kp = PyKeePass(database, password=db_password)
+                except:
+                    KEEPASS_OPEN_ERR = traceback.format_exc()
+                    module.fail_json(
+                        msg="cant find password")
+            if db_password is None and keyfile is not None:
+                try:
+                    kp = PyKeePass(database, keyfile=keyfile)
+                except:
+                    KEEPASS_OPEN_ERR = traceback.format_exc()
+                    module.fail_json(
+                        msg="cant find keyfile")
             result['changed'] = False
             result['database'] = database
             result['password'] = db_password
